@@ -1,6 +1,6 @@
 // import discord.js
 import {Client, MessageFlagsBitField, Events, GatewayIntentBits} from "discord.js";
-import {commandUtils, registerCommands} from "./util/commandUtils";
+import {commandUtils, processInteraction, registerCommands} from "./utils/commandUtils";
 
 // create a new Client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -10,34 +10,23 @@ client.once(Events.ClientReady, c => {
     console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
+// Validate environment variables
+if (!process.env.DISCORD_TOKEN) {
+    throw new Error('DISCORD_TOKEN environment variable is not set');
+}
+if (!process.env.DISCORD_CLIENT_ID) {
+    throw new Error('DISCORD_CLIENT_ID environment variable is not set');
+}
+
 // login with the token from .env.local
 client.login(process.env.DISCORD_TOKEN);
 
+// Register commands
 const commands = commandUtils(__dirname + '/commands');
-
 registerCommands(process.env.DISCORD_TOKEN!, process.env.DISCORD_CLIENT_ID!, commands);
 
-client.on(Events.InteractionCreate, async (interaction) => {
-    if (!interaction.isChatInputCommand()) return;
-    const command = commands.get(interaction.commandName);
-    if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`);
-        return;
-    }
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-        console.error(error);
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({
-                content: 'There was an error while executing this command!',
-                flags: MessageFlagsBitField.Flags.Ephemeral,
-            });
-        } else {
-            await interaction.reply({
-                content: 'There was an error while executing this command!',
-                flags: MessageFlagsBitField.Flags.Ephemeral,
-            });
-        }
-    }
-});
+// Listen for interactions
+client.on(
+    Events.InteractionCreate,
+    async (interaction) => processInteraction(interaction, commands)
+);

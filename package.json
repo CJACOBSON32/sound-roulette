@@ -10,8 +10,9 @@
     "discord.js": "^14.26.3"
   },
   "devDependencies": {
-    "typescript": "^5.5.3",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "^25.6.0",
+    "typescript": "^5.5.3"
   },
   "private": true
 }

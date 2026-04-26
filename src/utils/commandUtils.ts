@@ -1,10 +1,20 @@
-import {ApplicationCommand, Routes, Collection, CommandInteraction, REST, SlashCommandBuilder} from "discord.js";
+import {
+    ApplicationCommand,
+    Routes,
+    Collection,
+    CommandInteraction,
+    Interaction,
+    REST,
+    SlashCommandBuilder,
+    MessageFlagsBitField, AutocompleteInteraction
+} from "discord.js";
 import * as path from "node:path";
 import * as fs from "node:fs";
 
 export type Command = {
     data: SlashCommandBuilder;
     execute: (interaction: CommandInteraction) => Promise<void>;
+    autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>;
 }
 
 /**
@@ -56,4 +66,44 @@ export async function registerCommands(token: string, clientId: string, commands
     } catch (error) {
         console.error(error);
     }
+}
+
+export async function processInteraction(interaction: Interaction, commands: Collection<string, Command>) {
+    const command = getCommand(interaction, commands);
+
+    if (interaction.isAutocomplete()) {
+        await command.autocomplete!(interaction);
+        return;
+    }
+
+    if (!interaction.isChatInputCommand()) return;
+    try {
+        await command.execute(interaction);
+    } catch (error) {
+        console.error(error);
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({
+                content: `Error: ${(error as Error).message}`,
+                flags: MessageFlagsBitField.Flags.Ephemeral,
+            });
+        } else {
+            await interaction.reply({
+                content: `Error: ${(error as Error).message}`,
+                flags: MessageFlagsBitField.Flags.Ephemeral,
+            });
+        }
+    }
+}
+
+function getCommand(interaction: Interaction, commands: Collection<string, Command>) {
+    if (!(interaction.isAutocomplete() || interaction.isCommand())) {
+        throw new Error(`Invalid interaction type for command retrieval: ${interaction.type}`);
+    }
+
+    const command = commands.get(interaction.commandName);
+    if (!command) {
+        throw new Error(`No command matching ${interaction.commandName} was found.`);
+    }
+
+    return command;
 }
