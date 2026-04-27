@@ -1,5 +1,5 @@
 import {AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder} from "discord.js";
-import {emojis, isEmoji, streamFromUrl} from "../../utils/utils";
+import {EmojiInfo, emojis, isEmoji, streamFromUrl} from "../../utils/utils";
 
 export const data = new SlashCommandBuilder()
     .setName('upload-sound')
@@ -45,24 +45,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 export async function autocomplete(interaction: AutocompleteInteraction) {
     if (interaction.options.getFocused(true).name === 'emoji') {
         const focusedValue = interaction.options.getFocused();
-        const maxLength = 25;
+
+        const emojiList = [] as EmojiInfo[];
         if (focusedValue) {
             const filteredEmojis = emojis.filter(emoji => emoji.cldr_short_name.startsWith(focusedValue));
-            await interaction.respond(
-                filteredEmojis.map(emoji => ({
-                    name: `${emoji.character} ${emoji.cldr_short_name}`.slice(0, maxLength),
-                    value: emoji.character.slice(0, maxLength)
-                }))
-            );
+            emojiList.push(...filteredEmojis);
         }
         else {
-            await interaction.respond(
-                emojis.slice(0,10)
-                    .map(emoji => ({
-                        name: `${emoji.character} ${emoji.cldr_short_name}`.slice(0, maxLength),
-                        value: emoji.character.slice(0, maxLength)
-                    }))
-            );
+            emojiList.push(...emojis.slice(0, 25));
         }
+
+        const maxLength = 25;
+        await interaction.respond(
+            emojiList.map(emoji => ({
+                name: `${emoji.character} ${emoji.cldr_short_name}`.slice(0, maxLength),
+                value: emoji.character.slice(0, maxLength)
+            }))
+        );
     }
 }

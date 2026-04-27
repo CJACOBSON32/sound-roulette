@@ -27,4 +27,6 @@ export function csvToObject(path: string) {
     }).data;
 }
 
-export const emojis = csvToObject('emojis.csv') as {unicode: string, character: string, cldr_short_name: string}[];
+export type EmojiInfo = {unicode: string, character: string, cldr_short_name: string};
+
+export const emojis = csvToObject('emojis.csv') as EmojiInfo[];
