@@ -1,5 +1,5 @@
-import {ChatInputCommandInteraction, SlashCommandBuilder} from "discord.js";
-import {isEmoji, streamFromUrl} from "../../utils/utils";
+import {AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder} from "discord.js";
+import {emojis, isEmoji, streamFromUrl} from "../../utils/utils";
 
 export const data = new SlashCommandBuilder()
     .setName('upload-sound')
@@ -12,6 +12,7 @@ export const data = new SlashCommandBuilder()
         option.setName('emoji')
             .setDescription('The unicode emoji to use for the sound')
             .setRequired(true)
+            .setAutocomplete(true)
     ).addAttachmentOption(option =>
         option.setName('sound')
             .setDescription('The sound file to upload')
@@ -39,4 +40,29 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     });
 
     await interaction.reply(`Sound **${soundName}** uploaded successfully!`);
+}
+
+export async function autocomplete(interaction: AutocompleteInteraction) {
+    if (interaction.options.getFocused(true).name === 'emoji') {
+        const focusedValue = interaction.options.getFocused();
+        const maxLength = 25;
+        if (focusedValue) {
+            const filteredEmojis = emojis.filter(emoji => emoji.cldr_short_name.startsWith(focusedValue));
+            await interaction.respond(
+                filteredEmojis.map(emoji => ({
+                    name: `${emoji.character} ${emoji.cldr_short_name}`.slice(0, maxLength),
+                    value: emoji.character.slice(0, maxLength)
+                }))
+            );
+        }
+        else {
+            await interaction.respond(
+                emojis.slice(0,10)
+                    .map(emoji => ({
+                        name: `${emoji.character} ${emoji.cldr_short_name}`.slice(0, maxLength),
+                        value: emoji.character.slice(0, maxLength)
+                    }))
+            );
+        }
+    }
 }

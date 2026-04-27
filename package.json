@@ -7,11 +7,13 @@
     "build": "tsc"
   },
   "dependencies": {
-    "discord.js": "^14.26.3"
+    "discord.js": "^14.26.3",
+    "papaparse": "^5.5.3"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^25.6.0",
+    "@types/papaparse": "^5.5.2",
     "typescript": "^5.5.3"
   },
   "private": true

@@ -72,7 +72,11 @@ export async function processInteraction(interaction: Interaction, commands: Col
     const command = getCommand(interaction, commands);
 
     if (interaction.isAutocomplete()) {
-        await command.autocomplete!(interaction);
+        try {
+            await command.autocomplete!(interaction);
+        } catch (error) {
+            console.error(error);
+        }
         return;
     }
 

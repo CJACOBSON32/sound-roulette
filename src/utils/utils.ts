@@ -1,6 +1,6 @@
-import * as http from "node:http";
-import * as fs from "node:fs";
+import Papa from "papaparse";
 import {Readable} from "node:stream";
+import {readFileSync} from "node:fs";
 
 export async function streamFromUrl(url: string) {
     const response = await fetch(url);
@@ -13,10 +13,18 @@ export async function streamFromUrl(url: string) {
 }
 
 export function isEmoji(emoji: string) {
-    const ranges = [
-        '\ud83c[\udf00-\udfff]', // U+1F300 to U+1F3FF
-        '\ud83d[\udc00-\ude4f]', // U+1F400 to U+1F64F
-        '\ud83d[\ude80-\udeff]' // U+1F680 to U+1F6FF
-    ].join(' | ');
-    return (emoji.match(new RegExp(ranges, 'g'))?.length ?? 0) > 0;
+    const regex = /\p{Emoji_Presentation}/gu;
+    return regex.test(emoji);
 }
+
+export function csvToObject(path: string) {
+    // Load CSV file into a string
+    const fileContent = readFileSync(path, 'utf8');
+
+    // Using Papa Parse library
+    return Papa.parse(fileContent, {
+        header: true, // Converts rows to objects using the first row as keys
+    }).data;
+}
+
+export const emojis = csvToObject('emojis.csv') as {unicode: string, character: string, cldr_short_name: string}[];
