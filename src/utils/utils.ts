@@ -1,15 +1,14 @@
 import Papa from "papaparse";
-import {Readable} from "node:stream";
 import {readFileSync} from "node:fs";
 
 export async function streamFromUrl(url: string) {
     const response = await fetch(url);
+
     if (!response.body) {
         throw new Error(`No file at URL ${url}`);
     }
 
-    // @ts-ignore
-    return Readable.fromWeb(response.body);
+    return response.body;
 }
 
 export function isEmoji(emoji: string) {

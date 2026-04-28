@@ -1,5 +1,6 @@
 import {AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder} from "discord.js";
-import {EmojiInfo, emojis, isEmoji, streamFromUrl} from "../../utils/utils";
+import {EmojiInfo, emojis, isEmoji, streamFromUrl} from "../../../utils/utils";
+import {uploadSound} from "@/services/soundboard";
 
 export const data = new SlashCommandBuilder()
     .setName('upload-sound')
@@ -33,11 +34,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         throw new Error('Failed to create stream from URL');
     }
 
-    await guild.soundboardSounds.create({
-        name: soundName,
-        file: stream,
-        emojiName: emojiName
-    });
+    await uploadSound(guild, soundName, emojiName, stream);
 
     await interaction.reply(`Sound **${soundName}** uploaded successfully!`);
 }

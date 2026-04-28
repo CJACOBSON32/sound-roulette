@@ -1,4 +1,5 @@
 import {AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder} from "discord.js";
+import {deleteSound} from "@/services/soundboard";
 
 export const data = new SlashCommandBuilder()
     .setName('delete-sound')
@@ -14,14 +15,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const guild = interaction.guild!;
     const soundName = interaction.options.getString('name')!;
 
-    const sounds = await guild.soundboardSounds.fetch();
-    const sound = sounds.find(sound => sound.name === soundName);
+    await deleteSound(guild, soundName);
 
-    if (!sound) {
-        throw new Error(`Sound **${soundName}** was not found`);
-    }
-
-    await sound.delete();
     await interaction.reply(`Sound **${soundName}** deleted successfully!`);
 }
 

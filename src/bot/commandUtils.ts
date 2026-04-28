@@ -60,7 +60,7 @@ export async function registerCommands(token: string, clientId: string, commands
     try {
         console.log(`Started refreshing ${commandList.length} application (/) commands.`);
 
-        // The put method is used to fully refresh all commands in the guild with the current set
+        // The put method is used to fully refresh all commands with the current set
         const data = await rest.put(Routes.applicationCommands(clientId), { body: commandList }) as ApplicationCommand[];
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);
     } catch (error) {
