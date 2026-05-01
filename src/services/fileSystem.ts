@@ -15,14 +15,20 @@ export default interface RouletteFileSystem {
      * @param data Data to save
      * @returns File path
      */
-    saveFile: (filePath: string, data: Buffer) => Promise<string>;
+    saveFile: (fileName: string, data: Buffer) => Promise<string>;
 
     /**
      * Load a file from the file system
      * @param filePath Path to the file
      * @returns File data
      */
-    loadFile: (filePath: string) => Promise<Buffer>;
+    loadFile: (fileName: string) => Promise<Buffer>;
+
+    /**
+     * Delete a file from the file system
+     * @param filePath Path to the file
+     */
+    deleteFile: (fileName: string) => Promise<void>;
 }
 
 

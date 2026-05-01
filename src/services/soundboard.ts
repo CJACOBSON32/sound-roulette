@@ -4,7 +4,7 @@ import {ReadableStream as NodeReadableStream} from "node:stream/web";
 import {db} from "@/db";
 import {Sound, sounds, users} from "@/db/schema";
 import {and, eq} from "drizzle-orm";
-import {addSoundToDB, getSound, listSounds} from "@/services/soundboardDB";
+import {addSoundToDB, getSound, listSounds, removeSoundFromDB} from "@/services/soundboardDB";
 import {streamToBuffer} from "@/utils/utils";
 import {addGuild, getGuild} from "@/services/guildDB";
 
@@ -95,8 +95,14 @@ async function createDiscordSound(guild: Guild, soundName: string, emoji: string
  * @param guild Guild to delete sound from
  * @param soundName sound name to delete
  */
-export async function deleteSound(guild: Guild, soundName: string) {
-    const sound = await getSound(BigInt(guild.id), soundName);
+export async function removeSound(guild: Guild, soundName: string) {
+    const guildId = BigInt(guild.id);
+    const sound = await getSound(guildId, soundName);
+    if (!sound) {
+        throw new Error(`Sound **${soundName}** does not exist`);
+    }
+
+    await removeSoundFromDB(guildId, soundName);
 
     if (sound.isActive) {
         await guild.soundboardSounds.delete(sound.name);

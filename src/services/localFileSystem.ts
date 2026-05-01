@@ -22,4 +22,9 @@ export default class LocalFileSystem implements RouletteFileSystem {
         const file = Bun.file(filePath);
         return Buffer.from(await file.arrayBuffer());
     }
+
+    async deleteFile(fileName: string) {
+        const filePath = path.join('./sounds', fileName);
+        await Bun.file(filePath).delete();
+    }
 }

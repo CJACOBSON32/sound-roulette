@@ -70,3 +70,20 @@ export async function listSounds(guildId: bigint) {
         ))
         .orderBy(desc(sounds.createdAt));
 }
+
+export async function clearDeletedSounds(guildId: bigint | null = null) {
+    const whereClause
+        = guildId ? and(eq(sounds.guildId, BigInt(guildId)), eq(sounds.isDeleted, true)) : eq(sounds.isDeleted, true);
+
+    const deletedSounds = await db
+        .select()
+        .from(sounds)
+        .where(whereClause);
+
+    for (const sound of deletedSounds) {
+        await fileSystem.deleteFile(sound.file);
+    }
+
+    await db.delete(sounds)
+        .where(whereClause);
+}
