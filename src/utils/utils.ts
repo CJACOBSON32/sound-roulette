@@ -29,3 +29,28 @@ export function csvToObject(path: string) {
 export type EmojiInfo = {unicode: string, character: string, cldr_short_name: string};
 
 export const emojis = csvToObject('emojis.csv') as EmojiInfo[];
+
+export const environment = {
+    discordToken: process.env.DISCORD_TOKEN!,
+    discordCLientId: process.env.DISCORD_CLIENT_ID!,
+    databaseUrl: process.env.DATABASE_URL!,
+    databasePort: parseInt(process.env.DATABASE_PORT!),
+    databaseUsername: process.env.DATABASE_USERNAME!,
+    databasePassword: process.env.DATABASE_PASSWORD!,
+    databaseName: process.env.DATABASE_NAME!
+}
+
+
+
+export async function streamToBuffer(stream: ReadableStream): Promise<Buffer> {
+    const reader = stream.getReader();
+    const chunks: Uint8Array[] = [];
+
+    while (true) {
+        const {done, value} = await reader.read();
+        if (done) break;
+        chunks.push(value);
+    }
+
+    return Buffer.concat(chunks);
+}

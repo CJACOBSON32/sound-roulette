@@ -1,6 +1,7 @@
 // import discord.js
 import {Client, MessageFlagsBitField, Events, GatewayIntentBits} from "discord.js";
 import {commandUtils, processInteraction, registerCommands} from "./commandUtils";
+import {addGuild, getGuild} from "@/services/guildDB";
 
 export default function initializeDiscordBot() {
     // create a new Client instance
@@ -31,4 +32,12 @@ export default function initializeDiscordBot() {
         Events.InteractionCreate,
         async (interaction) => processInteraction(interaction, commands)
     );
+
+    client.on(Events.GuildCreate, async guild => {
+        const existingGuild = await getGuild(BigInt(guild.id));
+
+        if (!existingGuild) {
+            await addGuild(guild);
+        }
+    });
 }
