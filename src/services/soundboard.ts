@@ -1,10 +1,8 @@
 import {BufferResolvable, Guild, User} from "discord.js";
-import {Readable} from "node:stream";
-import {ReadableStream as NodeReadableStream} from "node:stream/web";
 import {db} from "@/db";
-import {Sound, sounds, users} from "@/db/schema";
-import {and, eq} from "drizzle-orm";
-import {addSoundToDB, getSound, listSounds, removeSoundFromDB} from "@/services/soundboardDB";
+import {users} from "@/db/schema";
+import {eq} from "drizzle-orm";
+import {addSoundToDB, getSound, removeSoundFromDB} from "@/services/soundboardDB";
 import {streamToBuffer} from "@/utils/utils";
 import {addGuild, getGuild} from "@/services/guildDB";
 
@@ -77,10 +75,10 @@ export async function addSoundToDiscord(
 
 /**
  * Creates a sound in the Discord server. Does not check if the sound already exists.
- * @param guild
- * @param soundName
- * @param emoji
- * @param file
+ * @param guild The guild to create the sound in
+ * @param soundName Name of the sound to create
+ * @param emoji Unicode emoji to use for the sound
+ * @param file File stream to upload
  */
 async function createDiscordSound(guild: Guild, soundName: string, emoji: string, file: BufferResolvable) {
     await guild.soundboardSounds.create({
