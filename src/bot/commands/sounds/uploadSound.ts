@@ -18,13 +18,17 @@ export const data = new SlashCommandBuilder()
         option.setName('sound')
             .setDescription('The sound file to upload')
             .setRequired(true)
-    );
+    ).addBooleanOption(option =>
+        option.setName('add-to-discord')
+            .setDescription('Whether to add the sound to Discord as well')
+            .setRequired(false));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     const guild = interaction.guild!;
     const soundName = interaction.options.getString('name')!;
     const attachment = interaction.options.getAttachment('sound')!;
     const emojiName = interaction.options.getString('emoji')!;
+    const addToDiscord = interaction.options.getBoolean('add-to-discord') ?? false;
     if (!isEmoji(emojiName)) {
         throw new Error('Must use a valid unicode emoji');
     }
@@ -34,7 +38,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         throw new Error('Failed to create stream from URL');
     }
 
-    await uploadSound(guild, soundName, emojiName, stream);
+    await uploadSound(guild, interaction.user, soundName, emojiName, stream, addToDiscord);
 
     await interaction.reply(`Sound **${soundName}** uploaded successfully!`);
 }
