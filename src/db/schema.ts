@@ -37,7 +37,7 @@ export const guildConfigs = pgTable("guild_configs", {
         .notNull()
         .unique()
         .references(() => guilds.guildId, { onDelete: "cascade" }),
-    activeSlotCount: integer("active_slot_count").notNull().default(7),
+    activeSlotCount: integer("active_slot_count").notNull().default(8),
     timezone: varchar("timezone", { length: 64 }).notNull().default("UTC"),
 });
 
@@ -106,7 +106,6 @@ export const activeSlotHistory = pgTable("active_slot_history", {
     soundId: integer("sound_id")
         .notNull()
         .references(() => sounds.soundId, { onDelete: "cascade" }),
-    slotIndex: integer("slot_index").notNull(),
     activatedAt: timestamp("activated_at", { withTimezone: true }).notNull().defaultNow(),
     // NULL means this sound is currently active in this slot
     deactivatedAt: timestamp("deactivated_at", { withTimezone: true }),
