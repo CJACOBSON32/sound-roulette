@@ -1,5 +1,5 @@
 import {db} from "@/db";
-import {guilds} from "@/db/schema";
+import {guildConfigs, guilds} from "@/db/schema";
 import {and, eq} from "drizzle-orm";
 import {Guild} from "discord.js";
 
@@ -14,12 +14,18 @@ export async function getGuild(guildId: bigint) {
 }
 
 export async function addGuild(guild: Guild) {
-    const newGuild = await db.insert(guilds).values({
+    const guildId = BigInt(guild.id);
+
+    await db.insert(guilds).values({
         guildName: guild.name,
-        guildId: BigInt(guild.id),
+        guildId: guildId,
         joinedAt: guild.joinedAt,
         isActive: true
     }).returning();
 
-    return newGuild[0];
+    await db.insert(guildConfigs).values({
+        guildId: guildId,
+    });
+
+    return getGuild(guildId);
 }
