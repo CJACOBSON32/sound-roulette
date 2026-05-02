@@ -1,6 +1,6 @@
 import {AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder} from "discord.js";
 import {removeSound} from "@/services/soundboard";
-import {searchSounds} from "@/services/soundboardDB";
+import {searchSounds} from "../../../services/database/soundboardDB";
 
 export const data = new SlashCommandBuilder()
     .setName('delete-sound')

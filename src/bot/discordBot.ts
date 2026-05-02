@@ -1,7 +1,7 @@
 // import discord.js
 import {Client, MessageFlagsBitField, Events, GatewayIntentBits} from "discord.js";
 import {commandUtils, processInteraction, registerCommands} from "./commandUtils";
-import {addGuild, getGuild} from "@/services/guildDB";
+import {addGuild, getGuild} from "../services/database/guildDB";
 
 export default function initializeDiscordBot() {
     // create a new Client instance

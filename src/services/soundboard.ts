@@ -2,9 +2,9 @@ import {BufferResolvable, Guild, User} from "discord.js";
 import {db} from "@/db";
 import {users} from "@/db/schema";
 import {eq} from "drizzle-orm";
-import {addSoundToDB, getSound, removeSoundFromDB} from "@/services/soundboardDB";
+import {addSoundToDB, getSound, removeSoundFromDB} from "./database/soundboardDB";
 import {streamToBuffer} from "@/utils/utils";
-import {addGuild, getGuild} from "@/services/guildDB";
+import {addGuild, getGuild} from "./database/guildDB";
 
 /**
  * Uploads a sound to the server
