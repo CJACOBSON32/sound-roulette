@@ -106,3 +106,7 @@ export async function removeSound(guild: Guild, soundName: string) {
         await guild.soundboardSounds.delete(sound.name);
     }
 }
+
+export async function importSoundsFromGuild(guildId: bigint) {
+
+}

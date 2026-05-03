@@ -1,7 +1,7 @@
-import {db} from "src/db";
-import {sounds} from "src/db/schema";
-import RouletteFileSystem from "src/services/fileSystem";
-import LocalFileSystem from "src/services/localFileSystem";
+import {db} from "@/db";
+import {sounds} from "@/db/schema";
+import RouletteFileSystem from "@/services/fileSystem";
+import LocalFileSystem from "@/services/localFileSystem";
 import {and, desc, eq, ilike} from "drizzle-orm";
 
 const fileSystem: RouletteFileSystem = new LocalFileSystem();

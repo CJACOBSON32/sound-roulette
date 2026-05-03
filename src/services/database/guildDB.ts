@@ -1,5 +1,5 @@
-import {db} from "src/db";
-import {guildConfigs, guilds} from "src/db/schema";
+import {db} from "@/db";
+import {guildConfigs, guilds} from "@/db/schema";
 import {and, eq} from "drizzle-orm";
 import {Guild} from "discord.js";
 
