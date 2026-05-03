@@ -2,9 +2,10 @@ import initializeDiscordBot from "@/bot/discordBot";
 import {importSoundsFromGuild} from "@/services/soundboard";
 import {getGuilds} from "@/services/database/guildDB";
 
-const client = initializeDiscordBot();
 
-(async () => {
+async function main() {
+    const client = await initializeDiscordBot();
+
     const guilds = await getGuilds();
 
     let importedGuilds: number = 0;
@@ -20,4 +21,6 @@ const client = initializeDiscordBot();
     if (importedGuilds > 0) {
         console.log(`Imported from ${importedGuilds} guilds`);
     }
-})();
+}
+
+(async () => (await main()))();

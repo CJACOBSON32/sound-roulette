@@ -3,7 +3,7 @@ import {Client, Events, GatewayIntentBits} from "discord.js";
 import {commandUtils, processInteraction, registerCommands} from "./commandUtils";
 import {addGuild, getGuild} from "@/services/database/guildDB";
 
-export default function initializeDiscordBot() {
+export default async function initializeDiscordBot() {
     // create a new Client instance
     const client = new Client({intents: [GatewayIntentBits.Guilds]});
 
@@ -21,11 +21,11 @@ export default function initializeDiscordBot() {
     }
 
     // login with the token from .env.local
-    client.login(process.env.DISCORD_TOKEN);
+    await client.login(process.env.DISCORD_TOKEN);
 
     // Register commands
     const commands = commandUtils(__dirname + '/commands');
-    registerCommands(process.env.DISCORD_TOKEN!, process.env.DISCORD_CLIENT_ID!, commands);
+    await registerCommands(process.env.DISCORD_TOKEN!, process.env.DISCORD_CLIENT_ID!, commands);
 
     // Listen for interactions
     client.on(
