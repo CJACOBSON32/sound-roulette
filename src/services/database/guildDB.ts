@@ -3,6 +3,13 @@ import {guildConfigs, guilds} from "@/db/schema";
 import {and, eq} from "drizzle-orm";
 import {Guild} from "discord.js";
 
+export async function getGuilds() {
+    return db.query.guilds.findMany({
+        with: {config: true},
+        where: eq(guilds.isDeleted, false)
+    });
+}
+
 export async function getGuild(guildId: bigint) {
     return db.query.guilds.findFirst({
         with: {config: true},

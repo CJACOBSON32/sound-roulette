@@ -40,4 +40,6 @@ export default function initializeDiscordBot() {
             await addGuild(guild);
         }
     });
+
+    return client;
 }

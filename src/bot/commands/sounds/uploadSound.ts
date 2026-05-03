@@ -1,5 +1,5 @@
 import {AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder} from "discord.js";
-import {EmojiInfo, emojis, isEmoji, streamFromUrl} from "../../../utils/utils";
+import {EmojiInfo, emojis, fileUrlToBuffer, isEmoji, streamFromUrl} from "../../../utils/utils";
 import {uploadSound} from "@/services/soundboard";
 
 export const data = new SlashCommandBuilder()
@@ -33,12 +33,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         throw new Error('Must use a valid unicode emoji');
     }
 
-    const stream = await streamFromUrl(attachment.url);
-    if (!stream) {
-        throw new Error('Failed to create stream from URL');
+    const buffer = await fileUrlToBuffer(attachment.url);
+    if (!buffer) {
+        throw new Error('Failed to create bufer from URL');
     }
 
-    await uploadSound(guild, interaction.user, soundName, emojiName, stream, addToDiscord);
+    await uploadSound(guild, interaction.user, soundName, emojiName, buffer, addToDiscord);
 
     await interaction.reply(`Sound **${soundName}** uploaded successfully!`);
 }

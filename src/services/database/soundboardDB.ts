@@ -1,5 +1,5 @@
 import {db} from "@/db";
-import {sounds} from "@/db/schema";
+import {activeSlotHistory, sounds} from "@/db/schema";
 import RouletteFileSystem from "@/services/fileSystem";
 import LocalFileSystem from "@/services/localFileSystem";
 import {and, desc, eq, ilike} from "drizzle-orm";
@@ -11,16 +11,23 @@ export async function addSoundToDB(
 ) {
     const fileName = `${soundName}.mp3`;
 
-    await db.insert(sounds).values({
+    const sound = (await db.insert(sounds).values({
         guildId: guildId,
         name: soundName,
         emoji: emoji,
         uploadedBy: uploadedBy,
         file: fileName,
         isActive: active
-    });
+    }).returning())[0];
 
     await fileSystem.saveFile(fileName, file);
+
+    if (active) {
+        await db.insert(activeSlotHistory).values({
+            guildId: guildId,
+            soundId: sound.soundId
+        })
+    }
 }
 
 export async function getSound(guildId: bigint, soundName: string) {
@@ -33,7 +40,7 @@ export async function getSound(guildId: bigint, soundName: string) {
         .limit(1)
 
     if (result.length === 0) {
-        throw new Error(`Sound **${soundName}** not found`);
+        return null;
     }
 
     return result[0];
