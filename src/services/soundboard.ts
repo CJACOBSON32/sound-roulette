@@ -1,4 +1,4 @@
-import {Guild, User} from "discord.js";
+import {Guild, SoundboardSound, SoundboardSoundResolvable, User} from "discord.js";
 import {db} from "@/db";
 import {sounds, users} from "@/db/schema";
 import {and, eq, inArray} from "drizzle-orm";
@@ -97,11 +97,25 @@ export async function removeSound(guild: Guild, soundName: string) {
         throw new Error(`Sound **${soundName}** does not exist`);
     }
 
-    await removeSoundFromDB(guildId, soundName);
-
     if (sound.isActive) {
-        await guild.soundboardSounds.delete(sound.name);
+        // TODO: Switch to using discord sound id in DB
+        const discordSounds = await guild.soundboardSounds.fetch();
+        const discordSound = discordSounds.find(s => s.name === soundName)!;
+
+        await guild.soundboardSounds.delete(discordSound.soundId);
     }
+
+    await removeSoundFromDB(guildId, soundName);
+}
+
+export async function setSoundActive(guildId: bigint, soundName: string, soundActive: boolean) {
+    await db.update(sounds)
+        .set({ isActive: soundActive })
+        .where(and(
+            eq(sounds.guildId, guildId),
+            eq(sounds.name, soundName),
+            eq(sounds.isDeleted, false)
+        ));
 }
 
 export async function importSoundsFromGuild(guild: Guild) {
@@ -122,16 +136,20 @@ export async function importSoundsFromGuild(guild: Guild) {
         if (soundExists)
             continue;
 
-        const file = await fileUrlToBuffer(sound.url);
-
-        await uploadSound(
-            guild,
-            sound.user!,
-            sound.name,
-            sound.emoji?.toString() ?? "",
-            file,
-            false,
-            true
-        );
+        await importSound(guild, sound);
     }
+}
+
+export async function importSound(guild: Guild, sound: SoundboardSound) {
+   const file = await fileUrlToBuffer(sound.url);
+
+    await uploadSound(
+        guild,
+        sound.user!,
+        sound.name,
+        sound.emoji?.toString() ?? "",
+        file,
+        false,
+        true
+    );
 }

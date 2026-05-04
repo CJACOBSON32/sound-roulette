@@ -9,7 +9,7 @@ import {
     pgEnum,
     text,
     primaryKey,
-    char,
+    char, unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -91,12 +91,13 @@ export const sounds = pgTable("sounds", {
     name: varchar("name", { length: 100 }).notNull(),
     emoji: varchar("emoji", { length: 4 }).notNull(),
     file: text("file_url").notNull(),
-    playCount: integer("play_count").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     lastPlayedAt: timestamp("last_played_at", { withTimezone: true }),
     isActive: boolean("is_active").notNull(),
     isDeleted: boolean("is_deleted").notNull().default(false),
-});
+}, (t) => [
+    unique().on(t.guildId, t.name, t.isDeleted)
+]);
 
 export const activeSlotHistory = pgTable("active_slot_history", {
     historyId: serial("history_id").primaryKey(),

@@ -1,11 +1,16 @@
 // import discord.js
-import {Client, Events, GatewayIntentBits} from "discord.js";
+import {Client, Events, GatewayIntentBits, GuildSoundboardSound} from "discord.js";
 import {commandUtils, processInteraction, registerCommands} from "./commandUtils";
 import {addGuild, getGuild} from "@/services/database/guildDB";
+import {importSound, setSoundActive} from "@/services/soundboard";
+import {getSound, removeSoundFromDB} from "@/services/database/soundboardDB";
 
 export default async function initializeDiscordBot() {
     // create a new Client instance
-    const client = new Client({intents: [GatewayIntentBits.Guilds]});
+    const client = new Client({intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildExpressions
+    ]});
 
     // listen for the client to be ready
     client.once(Events.ClientReady, c => {
@@ -40,6 +45,27 @@ export default async function initializeDiscordBot() {
             await addGuild(guild);
         }
     });
+
+    // Import added sounds
+    client.on(Events.GuildSoundboardSoundCreate, async sound => {
+        const dbSound = (await getSound(BigInt(sound.guildId), sound.name))
+        const guild = sound.guild;
+
+        if (!dbSound) {
+            await importSound(guild, sound);
+        }
+    })
+
+    // Set deleted sounds as inactive
+    client.on(Events.GuildSoundboardSoundDelete, async (sound) => {
+        const discordSound = sound as GuildSoundboardSound;
+        const guildId = BigInt(discordSound.guildId)
+        const dbSound = await getSound(guildId, discordSound.name);
+
+        if (dbSound) {
+            await setSoundActive(guildId, discordSound.name, false);
+        }
+    })
 
     return client;
 }
