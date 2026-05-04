@@ -1,11 +1,16 @@
 // import discord.js
-import {Client, MessageFlagsBitField, Events, GatewayIntentBits} from "discord.js";
+import {Client, Events, GatewayIntentBits, GuildSoundboardSound} from "discord.js";
 import {commandUtils, processInteraction, registerCommands} from "./commandUtils";
-import {addGuild, getGuild} from "@/services/guildDB";
+import {addGuild, getGuild} from "@/services/database/guildDB";
+import {importSound, setSoundActive} from "@/services/soundboard";
+import {getSound, removeSoundFromDB} from "@/services/database/soundboardDB";
 
-export default function initializeDiscordBot() {
+export default async function initializeDiscordBot() {
     // create a new Client instance
-    const client = new Client({intents: [GatewayIntentBits.Guilds]});
+    const client = new Client({intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildExpressions
+    ]});
 
     // listen for the client to be ready
     client.once(Events.ClientReady, c => {
@@ -21,11 +26,11 @@ export default function initializeDiscordBot() {
     }
 
     // login with the token from .env.local
-    client.login(process.env.DISCORD_TOKEN);
+    await client.login(process.env.DISCORD_TOKEN);
 
     // Register commands
     const commands = commandUtils(__dirname + '/commands');
-    registerCommands(process.env.DISCORD_TOKEN!, process.env.DISCORD_CLIENT_ID!, commands);
+    await registerCommands(process.env.DISCORD_TOKEN!, process.env.DISCORD_CLIENT_ID!, commands);
 
     // Listen for interactions
     client.on(
@@ -40,4 +45,27 @@ export default function initializeDiscordBot() {
             await addGuild(guild);
         }
     });
+
+    // Import added sounds
+    client.on(Events.GuildSoundboardSoundCreate, async sound => {
+        const dbSound = (await getSound(BigInt(sound.guildId), sound.name))
+        const guild = sound.guild;
+
+        if (!dbSound) {
+            await importSound(guild, sound);
+        }
+    })
+
+    // Set deleted sounds as inactive
+    client.on(Events.GuildSoundboardSoundDelete, async (sound) => {
+        const discordSound = sound as GuildSoundboardSound;
+        const guildId = BigInt(discordSound.guildId)
+        const dbSound = await getSound(guildId, discordSound.name);
+
+        if (dbSound) {
+            await setSoundActive(guildId, discordSound.name, false);
+        }
+    })
+
+    return client;
 }

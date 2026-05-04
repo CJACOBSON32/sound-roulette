@@ -1,5 +1,6 @@
 import Papa from "papaparse";
 import {readFileSync} from "node:fs";
+import {pathToFileURL} from "node:url";
 
 export async function streamFromUrl(url: string) {
     const response = await fetch(url);
@@ -40,8 +41,6 @@ export const environment = {
     databaseName: process.env.DATABASE_NAME!
 }
 
-
-
 export async function streamToBuffer(stream: ReadableStream): Promise<Buffer> {
     const reader = stream.getReader();
     const chunks: Uint8Array[] = [];
@@ -53,4 +52,8 @@ export async function streamToBuffer(stream: ReadableStream): Promise<Buffer> {
     }
 
     return Buffer.concat(chunks);
+}
+
+export async function fileUrlToBuffer(url: string) {
+    return streamToBuffer(await streamFromUrl(url));
 }
