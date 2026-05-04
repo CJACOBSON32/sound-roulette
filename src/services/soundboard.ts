@@ -130,6 +130,7 @@ export async function importSoundsFromGuild(guild: Guild) {
             inArray(sounds.name, guildSounds.map(s => s.name))
         ));
 
+    let numImported = 0;
     for (const sound of guildSounds) {
         const soundExists = existingSounds.some(s => s.name === sound.name);
 
@@ -137,7 +138,10 @@ export async function importSoundsFromGuild(guild: Guild) {
             continue;
 
         await importSound(guild, sound);
+        numImported++;
     }
+
+    return numImported;
 }
 
 export async function importSound(guild: Guild, sound: SoundboardSound) {
